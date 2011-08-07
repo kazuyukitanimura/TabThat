@@ -57,6 +57,8 @@ app.get('/', function(req, res){
       }
     });
   }); // 2D Array
+  // sanity check
+  sanityCheck(naiveTable, numPpl);
 
   // 1st Optimization: reduce the total $ flow
   var oweTable = expenses.map(function(x){
@@ -65,10 +67,10 @@ app.get('/', function(req, res){
     });
   }); // 2D Array
 
-  // copy the oweTable
-  var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
+  // sanity check
+  sanityCheck(oweTable, numPpl);
 
-  // 2nd Optimization: reduce the # of edges
+  // 2nd Optimization: reduce the # of edges O(n**3)
   for(var j=numPpl; j--;){
     for(var i=numPpl; i--;){
       for(var k=numPpl; k--;){
@@ -76,8 +78,8 @@ app.get('/', function(req, res){
         var v = oweTable[k][i]; // payment from i to k
         var w = oweTable[k][j]; // payment from j to k
         if(u>=0 && v>0 && w>=0 && u>=v){
-          oweTable[i][j] -= oweTable[k][i];
-          oweTable[k][j] += oweTable[k][i];
+          oweTable[i][j] -= v;
+          oweTable[k][j] += v;
           oweTable[k][i] = 0;
 
           // keep the symmetricity
@@ -89,14 +91,63 @@ app.get('/', function(req, res){
     }
   }
   // sanity check
-  sanityCheck(naiveTable, numPpl);
-  sanityCheck(oweTableOld, numPpl);
   sanityCheck(oweTable, numPpl);
+
+  // 3rd Optimization: reduce the # of edges O(n**4)
+  for(var i=numPpl; i--;){
+    for(var j=numPpl; j--;){
+      for(var k=numPpl; k--;){
+        for(var l=numPpl; l--;){
+          if(i!==k && j!==l){
+            var t = oweTable[i][j]; // payment from j to i
+            var u = oweTable[k][j]; // payment from j to k
+            var v = oweTable[i][l]; // payment from l to i
+            var w = oweTable[k][l]; // payment from l to k
+            if(t>0 && u>0 && v>0 && w>0){
+              var minTUVW = Math.min(t, u, v, w);
+              if(minTUVW === t){
+                oweTable[i][j] -= t
+                oweTable[k][j] += t
+                oweTable[i][l] += t
+                oweTable[k][l] -= t
+              }else if(minTUVW === u){
+                oweTable[i][j] += u
+                oweTable[k][j] -= u
+                oweTable[i][l] -= u
+                oweTable[k][l] += u
+              }else if(minTUVW === v){
+                oweTable[i][j] += v
+                oweTable[k][j] -= v
+                oweTable[i][l] -= v
+                oweTable[k][l] += v
+              }else if(minTUVW === w){
+                oweTable[i][j] -= w
+                oweTable[k][j] += w
+                oweTable[i][l] += w
+                oweTable[k][l] -= w
+              }else{
+                console.err('What!!');
+              }
+
+              // keep the symmetricity
+              oweTable[j][i] = -oweTable[i][j];
+              oweTable[j][k] = -oweTable[k][j];
+              oweTable[l][i] = -oweTable[i][l];
+              oweTable[l][k] = -oweTable[k][l];
+            }
+          }
+        }
+      }
+    }
+  }
+  // sanity check
+  sanityCheck(oweTable, numPpl);
+
   var nt  = divide2DArrayByX(naiveTable, numPpl, numPpl, numPpl);
   var ot  = divide2DArrayByX(oweTable,   numPpl, numPpl, numPpl);
-  var ot2 = negativeToZero(ot, numPpl, numPpl, numPpl);
   console.dir(nt);
   console.dir(ot);
+  var ot2 = negativeToZero(ot, numPpl, numPpl, numPpl);
   res.render('index', {
     title: 'TabThat',
     expense0 : expenses[0],
