@@ -36,12 +36,12 @@ app.configure('production', function(){
 
 app.get('/', function(req, res){
   var numPpl = 4
-  //var expenses = []; // index == userID
-  var expenses = [51,19,16,57]; // index == userID
   var total = 0;
-  //for(var i=numPpl; i--;){
-  //  expenses.push(Math.ceil(Math.random()*100)); // between 0 and 100
-  //}
+  //var expenses = [51,19,16,57]; // index == userID
+  var expenses = []; // index == userID
+  for(var i=numPpl; i--;){
+    expenses.push(Math.ceil(Math.random()*100)); // between 0 and 100
+  }
   for(var i=numPpl; i--;){
     total += expenses[i];
   }
@@ -74,18 +74,21 @@ app.get('/', function(req, res){
   for(var j=numPpl; j--;){
     for(var i=numPpl; i--;){
       for(var k=numPpl; k--;){
-        var u = oweTable[i][j]; // payment from j to i
-        var v = oweTable[k][i]; // payment from i to k
-        var w = oweTable[k][j]; // payment from j to k
-        if(u>=0 && v>0 && w>=0 && u>=v){
-          oweTable[i][j] -= v;
-          oweTable[k][j] += v;
-          oweTable[k][i] = 0;
+        if(i!==k){
+          var u = oweTable[i][j]; // payment from j to i
+          var v = oweTable[k][i]; // payment from i to k
+          var w = oweTable[k][j]; // payment from j to k
+          if(u>=0 && v>=0 && w>=0){
+            var minUV = Math.min(u, v);
+            oweTable[i][j] -= minUV;
+            oweTable[k][i] -= minUV;
+            oweTable[k][j] += minUV;
 
-          // keep the symmetricity
-          oweTable[j][i] = -oweTable[i][j];
-          oweTable[j][k] = -oweTable[k][j];
-          oweTable[i][k] = -oweTable[k][i];
+            // keep the symmetricity
+            oweTable[j][i] = -oweTable[i][j];
+            oweTable[i][k] = -oweTable[k][i];
+            oweTable[j][k] = -oweTable[k][j];
+          }
         }
       }
     }
