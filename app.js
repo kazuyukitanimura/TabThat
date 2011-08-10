@@ -77,7 +77,7 @@ app.get('/', function(req, res){
   // 2nd optimization guarantees that the graph does not have multiple hops, i.e. the graph diameter is 1
   var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
   for(var j=numPpl; j--;){
-    var outEdgeI = inEdgeI = j;
+    var outEdgeI = inEdgeI = j; // note oweTable[j][j] is always 0
     for(var i=numPpl; i--;){
       var tmpEdge = oweTableOld[i][j];
       if(tmpEdge===0){
