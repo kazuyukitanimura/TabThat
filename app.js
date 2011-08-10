@@ -77,6 +77,36 @@ app.get('/', function(req, res){
   // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
   var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
   for(var j=numPpl; j--;){
+    var outEdgeI, inEdgeI;
+    for(var i=numPpl; i--;){
+      var tmpEdge = oweTableOld[i][j];
+      if(tmpEdge===0){
+        continue;
+      }else if(tmpEdge>0){
+        outEdgeI = i;
+      }else{
+        inEdgeI = i;
+      }
+      if(outEdgeI>=0 && inEdgeI>=0){
+        var minV = Math.min(oweTableOld[outEdgeI][j], -oweTableOld[inEdgeI][j]);
+        oweTableOld[outEdgeI][      j] -= minV;
+        oweTableOld[ inEdgeI][      j] += minV;
+        oweTableOld[outEdgeI][inEdgeI] += minV;
+
+        // keep the symmetricity
+        oweTableOld[      j][outEdgeI] = -oweTableOld[outEdgeI][      j];
+        oweTableOld[      j][ inEdgeI] = -oweTableOld[ inEdgeI][      j];
+        oweTableOld[inEdgeI][outEdgeI] = -oweTableOld[outEdgeI][inEdgeI];
+      }
+    }
+  }
+  // sanity check
+  sanityCheck(oweTableOld, numPpl);
+
+  // 2nd Optimization: reduce the # of edges O(n**2) between 3 nodes
+  // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
+  var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
+  for(var j=numPpl; j--;){
     var outEdges = [];
     var inEdges  = [];
     for(var i=numPpl; i--;){
