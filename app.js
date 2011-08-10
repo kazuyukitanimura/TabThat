@@ -61,6 +61,7 @@ app.get('/', function(req, res){
   sanityCheck(naiveTable, numPpl);
 
   // 1st Optimization: reduce the total $ flow
+  // 1st optimization guarantees that the graph is DAG and has no bidirectional edges
   var oweTable = expenses.map(function(x){
     return expenses.map(function(y){
       return x-y; // divide by numPpl later
@@ -70,7 +71,8 @@ app.get('/', function(req, res){
   // sanity check
   sanityCheck(oweTable, numPpl);
 
-  // 2nd Optimization: reduce the # of edges O(n**3)
+  // 2nd Optimization: reduce the # of edges O(n**3) between 3 nodes
+  // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
   for(var j=numPpl; j--;){
     for(var i=numPpl; i--;){
       for(var k=numPpl; k--;){
@@ -96,7 +98,7 @@ app.get('/', function(req, res){
   // sanity check
   sanityCheck(oweTable, numPpl);
 
-  // 3rd Optimization: reduce the # of edges O(n**4)
+  // 3rd Optimization: reduce the # of edges O(n**4) between 4 nodes
   for(var i=numPpl; i--;){
     for(var j=numPpl; j--;){
       for(var k=numPpl; k--;){
