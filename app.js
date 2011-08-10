@@ -74,7 +74,7 @@ app.get('/', function(req, res){
   sanityCheck(oweTable, numPpl);
 
   // 2nd Optimization: reduce the # of edges O(n**2) between 3 nodes
-  // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
+  // 2nd optimization guarantees that the graph does not have multiple hops, i.e. the graph diameter is 1
   var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
   for(var j=numPpl; j--;){
     var outEdgeI = inEdgeI = j;
@@ -104,7 +104,7 @@ app.get('/', function(req, res){
   sanityCheck(oweTableOld, numPpl);
 
   // 2nd Optimization: reduce the # of edges O(n**3) between 3 nodes
-  // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
+  // 2nd optimization guarantees that the graph does not have multiple hops, i.e. the graph diameter is 1
   for(var j=numPpl; j--;){
     for(var i=numPpl; i--;){
       for(var k=numPpl; k--;){
