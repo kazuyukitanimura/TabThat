@@ -35,9 +35,8 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-  var numPpl = 4
+  var numPpl = 4;
   var total = 0;
-  //var expenses = [51,19,16,57]; // index == userID
   var expenses = []; // index == userID
   for(var i=numPpl; i--;){
     expenses.push(Math.ceil(Math.random()*100)); // between 0 and 100
@@ -45,6 +44,7 @@ app.get('/', function(req, res){
   for(var i=numPpl; i--;){
     total += expenses[i];
   }
+  //var expenses = [51,19,16,57]; // index == userID
 
   // NO Optimization
   var naiveTable = expenses.map(function(x, i){
@@ -71,16 +71,47 @@ app.get('/', function(req, res){
   // sanity check
   sanityCheck(oweTable, numPpl);
 
+  //// 2nd Optimization: reduce the # of edges O(n**2) between 3 nodes
+  //// 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
+  //var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
+  //for(var j=numPpl; j--;){
+  //  var outEdges = [];
+  //  var inEdges  = [];
+  //  for(var i=j; i--;){
+  //    var tmpEdge = oweTableOld[i][j];
+  //    if(tmpEdge>0){
+  //      outEdges.push({v:tmpEdge, i:i});
+  //    }else if(tmpEdge<0){
+  //      inEdges.push({v:tmpEdge, i:i});
+  //    }
+  //  }
+  //  for(var i=Math.min(outEdges.length, inEdges.length); i--;){
+  //    var outEdge = outEdges.pop();
+  //    var inEdge = inEdges.pop();
+  //    var minV = Math.min(outEdge.v, -inEdge.v);
+  //    oweTableOld[outEdge.i][       j] -= minV;
+  //    oweTableOld[ inEdge.i][       j] += minV;
+  //    oweTableOld[outEdge.i][inEdge.i] += minV;
+
+  //    // keep the symmetricity
+  //    oweTableOld[       j][outEdge.i] = -oweTableOld[outEdge.i][       j];
+  //    oweTableOld[       j][ inEdge.i] = -oweTableOld[ inEdge.i][       j];
+  //    oweTableOld[inEdge.i][outEdge.i] = -oweTableOld[outEdge.i][inEdge.i];
+  //  }
+  //}
+  //// sanity check
+  //sanityCheck(oweTableOld, numPpl);
+
   // 2nd Optimization: reduce the # of edges O(n**3) between 3 nodes
   // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
   for(var j=numPpl; j--;){
     for(var i=numPpl; i--;){
       for(var k=numPpl; k--;){
-        if(i!==k){
+        if(i!==k && i!==j){
           var u = oweTable[i][j]; // payment from j to i
           var v = oweTable[k][i]; // payment from i to k
           var w = oweTable[k][j]; // payment from j to k
-          if(u>=0 && v>=0 && w>=0){
+          if(u>0 && v>0){
             var minUV = Math.min(u, v);
             oweTable[i][j] -= minUV;
             oweTable[k][i] -= minUV;
