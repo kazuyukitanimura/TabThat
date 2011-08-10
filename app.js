@@ -77,7 +77,7 @@ app.get('/', function(req, res){
   // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
   var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
   for(var j=numPpl; j--;){
-    var outEdgeI, inEdgeI;
+    var outEdgeI = inEdgeI = j;
     for(var i=numPpl; i--;){
       var tmpEdge = oweTableOld[i][j];
       if(tmpEdge===0){
@@ -87,8 +87,8 @@ app.get('/', function(req, res){
       }else{
         inEdgeI = i;
       }
-      if(outEdgeI>=0 && inEdgeI>=0){
-        var minV = Math.min(oweTableOld[outEdgeI][j], -oweTableOld[inEdgeI][j]);
+      var minV = Math.min(oweTableOld[outEdgeI][j], -oweTableOld[inEdgeI][j]);
+      if(minV){
         oweTableOld[outEdgeI][      j] -= minV;
         oweTableOld[ inEdgeI][      j] += minV;
         oweTableOld[outEdgeI][inEdgeI] += minV;
@@ -97,44 +97,6 @@ app.get('/', function(req, res){
         oweTableOld[      j][outEdgeI] = -oweTableOld[outEdgeI][      j];
         oweTableOld[      j][ inEdgeI] = -oweTableOld[ inEdgeI][      j];
         oweTableOld[inEdgeI][outEdgeI] = -oweTableOld[outEdgeI][inEdgeI];
-      }
-    }
-  }
-  // sanity check
-  sanityCheck(oweTableOld, numPpl);
-
-  // 2nd Optimization: reduce the # of edges O(n**2) between 3 nodes
-  // 2nd optimization guarantees that the graph does not have no multiple hops, i.e. the graph diameter is 1
-  var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
-  for(var j=numPpl; j--;){
-    var outEdges = [];
-    var inEdges  = [];
-    for(var i=numPpl; i--;){
-      var tmpEdge = oweTableOld[i][j];
-      if(tmpEdge>0){
-        outEdges.unshift({v:tmpEdge, i:i});
-      }else if(tmpEdge<0){
-        inEdges.unshift({v:tmpEdge, i:i});
-      }
-    }
-    while(outEdges.length && inEdges.length){
-      var outEdge = outEdges[0];
-      var inEdge = inEdges[0];
-      var minV = Math.min(outEdge.v, -inEdge.v);
-      oweTableOld[outEdge.i][       j] -= minV;
-      oweTableOld[ inEdge.i][       j] += minV;
-      oweTableOld[outEdge.i][inEdge.i] += minV;
-
-      // keep the symmetricity
-      oweTableOld[       j][outEdge.i] = -oweTableOld[outEdge.i][       j];
-      oweTableOld[       j][ inEdge.i] = -oweTableOld[ inEdge.i][       j];
-      oweTableOld[inEdge.i][outEdge.i] = -oweTableOld[outEdge.i][inEdge.i];
-      if(minV===outEdge.v){
-        outEdges.shift();
-        inEdges[0].v += minV;
-      }else{
-        inEdges.shift();
-        outEdges[0].v -= minV;
       }
     }
   }
