@@ -6,6 +6,7 @@
 var express = require('express');
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore({ reapInterval: 60000 * 10 });
+var assert = require('assert');
 
 var app = module.exports = express.createServer();
 
@@ -35,7 +36,7 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-  var numPpl = 6;
+  var numPpl = 4;
   var total = 0;
   var expenses = []; // index == userID
   for(var i=numPpl; i--;){
@@ -56,143 +57,181 @@ app.get('/', function(req, res){
         return 0;
       }
       else{
-        return x; // divide by numPpl later
+        return y; // divide by numPpl later
       }
     });
   }); // 2D Array
   // sanity check
-  sanityCheck(naiveTable, numPpl);
+  print2DArray(naiveTable);
 
-  // 1st Optimization: reduce the total $ flow
+  // 1st Optimization: eliminate the bidirectional $ flow O(n**2)
   // 1st optimization guarantees that the graph is DAG and has no bidirectional edges
   var oweTable = expenses.map(function(x){
     return expenses.map(function(y){
-      return x-y; // divide by numPpl later
+      return y-x; // divide by numPpl later
     });
   }); // 2D Array
-
   // sanity check
-  sanityCheck(oweTable, numPpl);
+  print2DArray(oweTable);
 
-  //// 2nd Optimization: reduce the # of edges O(n**2) between 3 nodes
+  // 2nd Optimization: reduce the # of edges O(n**2)
+  // 2nd optimization guarantees that the graph is a bipartite graph, i.e. the graph diameter is 1
+  var oweTableNew = [];
+  var subTotals = [];
+  var idxArray = [];
+  for(var i=0; i<numPpl; i++){
+    var oweArray = [];
+    var subtotal = 0;
+    for(var j=0; j<numPpl; j++){
+      oweArray[j] = 0;
+      subtotal += oweTable[i][j];
+    }
+    oweTableNew[i] = oweArray;
+    subTotals[i] = subtotal;
+    idxArray[i] = i;
+  }
+  idxArray.sort(function(i, j){
+    return subTotals[i] - subTotals[j];
+  });
+  for(var i=numPpl-1, j=0; i>j;){
+    var owener = idxArray[i]; // pay
+    var owenee = idxArray[j]; // receive
+    var minOwe = Math.min(subTotals[owener], -subTotals[owenee]);
+    oweTableNew[owener][owenee] =  minOwe;
+    oweTableNew[owenee][owener] = -minOwe;
+    subTotals[owener] -= minOwe;
+    subTotals[owenee] += minOwe;
+    if(subTotals[owener]===0){
+      i--;
+    }
+    if(subTotals[owenee]===0){
+      j++;
+    }
+  }
+  // sanity check
+  print2DArray(oweTableNew);
+  for(var i=subTotals; i--;){
+    assert.ok(subTotals[i]===0);
+  }
+  oweTable = transpose(oweTableNew);
+
+  function print2DArray(t){
+    assert.ok(t.length===t[0].length);
+    console.dir(t);
+    for(var i=0; i<t.length; i++){
+      var subtotal = 0;
+      for(var j=0; j<t[i].length; j++){
+        subtotal += t[i][j];
+      }
+      console.log(i+": "+subtotal);
+    }
+    console.log("");
+  }
+
+  //// NO Optimization
+  //var naiveTable = expenses.map(function(x, i){
+  //  return expenses.map(function(y, j){
+  //    if (i===j){
+  //      return 0;
+  //    }
+  //    else{
+  //      return x; // divide by numPpl later
+  //    }
+  //  });
+  //}); // 2D Array
+  //// sanity check
+  //sanityCheck(naiveTable, numPpl);
+
+  //// 1st Optimization: reduce the total $ flow
+  //// 1st optimization guarantees that the graph is DAG and has no bidirectional edges
+  //var oweTable = expenses.map(function(x){
+  //  return expenses.map(function(y){
+  //    return x-y; // divide by numPpl later
+  //  });
+  //}); // 2D Array
+  //// sanity check
+  //sanityCheck(oweTable, numPpl);
+
+  //// 2nd Optimization: reduce the # of edges O(n**3) between 3 nodes
   //// 2nd optimization guarantees that the graph is a bipartite graph, i.e. the graph diameter is 1
-  //var oweTableOld = copy2DArray(oweTable, numPpl, numPpl);
   //for(var j=numPpl; j--;){
-  //  var outEdgeIs = [];
-  //  var inEdgeIs  = [];
   //  for(var i=numPpl; i--;){
-  //    var tmpEdge = oweTableOld[i][j];
-  //    if(tmpEdge!==0){
-  //      if(tmpEdge>0){
-  //        outEdgeIs.push(i);
-  //      }else{
-  //        inEdgeIs.push(i);
-  //      }
-  //      var k = outEdgeIs[0];
-  //      var l = inEdgeIs[0];
-  //      if(k && l){
-  //        var minV = Math.min(oweTableOld[k][j], -oweTableOld[l][j]);
-  //        if((oweTableOld[k][j] -= minV) === 0){
-  //          outEdgeIs.pop();
-  //        }
-  //        if((oweTableOld[l][j] += minV) === 0){
-  //          inEdgeIs.pop();
-  //        }
-  //        oweTableOld[k][l] += minV;
+  //    for(var k=numPpl; k--;){
+  //      if(i!==k && i!==j){
+  //        var u = oweTable[i][j]; // payment from j to i
+  //        var v = oweTable[k][i]; // payment from i to k
+  //        var w = oweTable[k][j]; // payment from j to k
+  //        if(u>0 && v>0){
+  //          var minUV = Math.min(u, v);
+  //          oweTable[i][j] -= minUV;
+  //          oweTable[k][i] -= minUV;
+  //          oweTable[k][j] += minUV;
 
-  //        // keep the symmetricity
-  //        oweTableOld[j][k] = -oweTableOld[k][j];
-  //        oweTableOld[j][l] = -oweTableOld[l][j];
-  //        oweTableOld[l][k] = -oweTableOld[k][l];
+  //          // keep the symmetricity
+  //          oweTable[j][i] = -oweTable[i][j];
+  //          oweTable[i][k] = -oweTable[k][i];
+  //          oweTable[j][k] = -oweTable[k][j];
+  //        }
   //      }
   //    }
   //  }
   //}
   //// sanity check
-  //sanityCheck(oweTableOld, numPpl);
+  //sanityCheck(oweTable, numPpl);
 
-  // 2nd Optimization: reduce the # of edges O(n**3) between 3 nodes
-  // 2nd optimization guarantees that the graph is a bipartite graph, i.e. the graph diameter is 1
-  for(var j=numPpl; j--;){
-    for(var i=numPpl; i--;){
-      for(var k=numPpl; k--;){
-        if(i!==k && i!==j){
-          var u = oweTable[i][j]; // payment from j to i
-          var v = oweTable[k][i]; // payment from i to k
-          var w = oweTable[k][j]; // payment from j to k
-          if(u>0 && v>0){
-            var minUV = Math.min(u, v);
-            oweTable[i][j] -= minUV;
-            oweTable[k][i] -= minUV;
-            oweTable[k][j] += minUV;
+  //// 3rd Optimization: reduce the # of edges O(n**4) between 4 nodes
+  //for(var i=numPpl; i--;){
+  //  for(var j=numPpl; j--;){
+  //    for(var k=numPpl; k--;){
+  //      for(var l=numPpl; l--;){
+  //        if(i!==k && j!==l){
+  //          var t = oweTable[i][j]; // payment from j to i
+  //          var u = oweTable[k][j]; // payment from j to k
+  //          var v = oweTable[i][l]; // payment from l to i
+  //          var w = oweTable[k][l]; // payment from l to k
+  //          if(t>0 && u>0 && v>0 && w>0){
+  //            var minTUVW = Math.min(t, u, v, w);
+  //            if(minTUVW === t){
+  //              oweTable[i][j] -= t
+  //              oweTable[k][j] += t
+  //              oweTable[i][l] += t
+  //              oweTable[k][l] -= t
+  //            }else if(minTUVW === u){
+  //              oweTable[i][j] += u
+  //              oweTable[k][j] -= u
+  //              oweTable[i][l] -= u
+  //              oweTable[k][l] += u
+  //            }else if(minTUVW === v){
+  //              oweTable[i][j] += v
+  //              oweTable[k][j] -= v
+  //              oweTable[i][l] -= v
+  //              oweTable[k][l] += v
+  //            }else if(minTUVW === w){
+  //              oweTable[i][j] -= w
+  //              oweTable[k][j] += w
+  //              oweTable[i][l] += w
+  //              oweTable[k][l] -= w
+  //            }else{
+  //              console.err('What!!');
+  //            }
 
-            // keep the symmetricity
-            oweTable[j][i] = -oweTable[i][j];
-            oweTable[i][k] = -oweTable[k][i];
-            oweTable[j][k] = -oweTable[k][j];
-          }
-        }
-      }
-    }
-  }
-  // sanity check
-  sanityCheck(oweTable, numPpl);
+  //            // keep the symmetricity
+  //            oweTable[j][i] = -oweTable[i][j];
+  //            oweTable[j][k] = -oweTable[k][j];
+  //            oweTable[l][i] = -oweTable[i][l];
+  //            oweTable[l][k] = -oweTable[k][l];
+  //          }
+  //        }
+  //      }
+  //    }
+  //  }
+  //}
+  //// sanity check
+  //sanityCheck(oweTable, numPpl);
 
-  // 3rd Optimization: reduce the # of edges O(n**4) between 4 nodes
-  for(var i=numPpl; i--;){
-    for(var j=numPpl; j--;){
-      for(var k=numPpl; k--;){
-        for(var l=numPpl; l--;){
-          if(i!==k && j!==l){
-            var t = oweTable[i][j]; // payment from j to i
-            var u = oweTable[k][j]; // payment from j to k
-            var v = oweTable[i][l]; // payment from l to i
-            var w = oweTable[k][l]; // payment from l to k
-            if(t>0 && u>0 && v>0 && w>0){
-              var minTUVW = Math.min(t, u, v, w);
-              if(minTUVW === t){
-                oweTable[i][j] -= t
-                oweTable[k][j] += t
-                oweTable[i][l] += t
-                oweTable[k][l] -= t
-              }else if(minTUVW === u){
-                oweTable[i][j] += u
-                oweTable[k][j] -= u
-                oweTable[i][l] -= u
-                oweTable[k][l] += u
-              }else if(minTUVW === v){
-                oweTable[i][j] += v
-                oweTable[k][j] -= v
-                oweTable[i][l] -= v
-                oweTable[k][l] += v
-              }else if(minTUVW === w){
-                oweTable[i][j] -= w
-                oweTable[k][j] += w
-                oweTable[i][l] += w
-                oweTable[k][l] -= w
-              }else{
-                console.err('What!!');
-              }
-
-              // keep the symmetricity
-              oweTable[j][i] = -oweTable[i][j];
-              oweTable[j][k] = -oweTable[k][j];
-              oweTable[l][i] = -oweTable[i][l];
-              oweTable[l][k] = -oweTable[k][l];
-            }
-          }
-        }
-      }
-    }
-  }
-  // sanity check
-  sanityCheck(oweTable, numPpl);
-
-  var nt  = divide2DArrayByX(naiveTable, numPpl, numPpl, numPpl);
-  var ot  = divide2DArrayByX(oweTable,   numPpl, numPpl, numPpl);
-  console.dir(nt);
-  console.dir(ot);
-  var ot2 = negativeToZero(ot, numPpl, numPpl, numPpl);
+  var nt  = divide2DArrayByX(naiveTable, numPpl);
+  var ot  = divide2DArrayByX(oweTable,   numPpl);
+  var ot2 = negativeToZero(ot, numPpl);
   res.render('index', {
     title: 'TabThat',
     expense0 : expenses[0],
@@ -234,22 +273,35 @@ app.get('/', function(req, res){
     opt33 : ot2[3][3]
   });
 
-  function copy2DArray(baseArray, n, m){
+  function transpose(baseArray){
+    assert.ok(baseArray.length===baseArray[0].length);
     var newArray = [];
-    for(var i=0; i<n; i++){
+    for(var i=0; i<baseArray.length; i++){
       newArray.push([]);
-      for(var j=0; j<m; j++){
+      for(var j=0; j<baseArray.length; j++){
+        newArray[i][j] = baseArray[j][i];
+      }
+    }
+    return newArray;
+  }
+
+  function copy2DArray(baseArray){
+    var newArray = [];
+    for(var i=0; i<baseArray.length; i++){
+      newArray.push([]);
+      for(var j=0; j<baseArray[0].length; j++){
         newArray[i][j] = baseArray[i][j];
       }
     }
     return newArray;
   }
 
-  function sanityCheck(t, n){
+  function sanityCheck(t){
+    assert.ok(t.length===t[0].length);
     console.dir(t);
-    for(var j=0; j<n; j++){
+    for(var j=0; j<t.length; j++){
       var subtotal = 0;
-      for(var i=0; i<n; i++){
+      for(var i=0; i<t.length; i++){
         subtotal += t[i][j]
       }
       console.log(j, ": ",subtotal);
@@ -257,21 +309,22 @@ app.get('/', function(req, res){
     console.log("");
   }
   
-  function divide2DArrayByX(baseArray, n, m, x){
+  function divide2DArrayByX(baseArray, x){
     var newArray = [];
-    for(var i=0; i<n; i++){
+    for(var i=0; i<baseArray.length; i++){
       newArray.push([]);
-      for(var j=0; j<m; j++){
+      for(var j=0; j<baseArray[0].length; j++){
         newArray[i][j] = baseArray[i][j] / x;
       }
     }
     return newArray;
   }
-  function negativeToZero(baseArray, n, m, x){
+
+  function negativeToZero(baseArray, x){
     var newArray = [];
-    for(var i=0; i<n; i++){
+    for(var i=0; i<baseArray.length; i++){
       newArray.push([]);
-      for(var j=0; j<m; j++){
+      for(var j=0; j<baseArray[0].length; j++){
         if(baseArray[i][j]<0){
           newArray[i][j] = 0;
         }
