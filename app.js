@@ -73,8 +73,15 @@ app.get('/', function(req, res){
   }); // 2D Array
   // sanity check
   print2DArray(oweTable);
+  //oweTable = [[  0,  0,  0,  5,  5,  0],
+  //            [  0,  0,  0,  0,  5,  5],
+  //            [  0,  0,  0, 15,  0,  0],
+  //            [ -5,  0,-15,  0,  0,  0],
+  //            [ -5, -5,  0,  0,  0,  0],
+  //            [  0, -5,  0,  0,  0,  0]];
 
-  // 2nd Optimization: reduce the # of edges O(n**2)
+
+  // 2nd Optimization: reduce the # of edges O(N**2 *logN)
   // 2nd optimization guarantees that the graph is a bipartite graph, i.e. the graph diameter is 1
   var oweTableNew = [];
   var subTotals = [];
@@ -93,20 +100,17 @@ app.get('/', function(req, res){
   idxArray.sort(function(i, j){
     return subTotals[i] - subTotals[j];
   });
-  for(var i=numPpl-1, j=0; i>j;){
-    var owener = idxArray[i]; // pay
-    var owenee = idxArray[j]; // receive
+  while(subTotals[idxArray[0]]!==0){
+    var owener = idxArray[numPpl-1]; // pay
+    var owenee = idxArray[0]; // receive
     var minOwe = Math.min(subTotals[owener], -subTotals[owenee]);
     oweTableNew[owener][owenee] =  minOwe;
     oweTableNew[owenee][owener] = -minOwe;
     subTotals[owener] -= minOwe;
     subTotals[owenee] += minOwe;
-    if(subTotals[owener]===0){
-      i--;
-    }
-    if(subTotals[owenee]===0){
-      j++;
-    }
+    idxArray.sort(function(i, j){
+      return subTotals[i] - subTotals[j];
+    });
   }
   // sanity check
   print2DArray(oweTableNew);
