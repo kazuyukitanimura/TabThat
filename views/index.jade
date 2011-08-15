@@ -10,7 +10,9 @@ p total expense $#{total}
 br
 p Who owes who for how much??
 br
-p Naive Solution
+p Naive Solution 
+  i
+    small (split the each bill by the number of people)
 table
   tr
     td.legend
@@ -43,7 +45,10 @@ table
     td $#{naive32}
     td $#{naive33}
 br
-p TabThat simplifies this
+p 
+  b TabThat Solution 
+    i
+      small (minimize the number of transaction)
 table
   tr
     td.legend
