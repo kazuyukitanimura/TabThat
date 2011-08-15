@@ -125,9 +125,9 @@ app.get('/', function(req, res){
   }
   //oweTable = transpose(oweTableNew);
 
-  var nt  = divide2DArrayByX(naiveTable, numPpl);
-  var ot  = divide2DArrayByX(oweTable,   numPpl);
-  var ot2 = negativeToZero(ot, numPpl);
+  var nt  = divide2DArrayByX(naiveTable,  numPpl);
+  var ot  = divide2DArrayByX(oweTableNew, numPpl);
+  var ot2 = negativeToZero(ot);
   res.render('index', {
     title: 'TabThat',
     expense0 : expenses[0],
@@ -216,7 +216,7 @@ app.get('/', function(req, res){
     return newArray;
   }
 
-  function negativeToZero(baseArray, x){
+  function negativeToZero(baseArray){
     var newArray = [];
     for(var i=0; i<baseArray.length; i++){
       newArray.push([]);
