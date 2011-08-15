@@ -15,21 +15,26 @@ a {
   color: #00B7FF;
 }
 table {
-  color: #333333;
+  color: #333;
   border-width: 1px;
-  border-color: #666666;
+  border-color: #333;
   border-collapse: collapse;
+  border-radius: 4px;
+  box-shadow: 0px 1px 2px #555;
 }
 table th {
   padding: 8px;
   border-style: solid;
-  border-color: #666666;
+  border-color: #ccc;
   background-color: #dedede;
 }
 table td {
   border-width: 1px;
   padding: 8px;
   border-style: solid;
-  border-color: #666666;
-  background-color: #ffffff;
+  border-color: #ccc;
+  background-color: #fff;
+}
+.legend {
+  background: -webkit-linear-gradient(90deg, #e7e7e7, #f7f7f7);
 }
