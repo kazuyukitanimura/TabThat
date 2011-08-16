@@ -1,12 +1,20 @@
 h1= title
-p In a day trip
+p In a day trip, suppose
 
-p A spent $#{expense0} for Dinner
-p B spent $#{expense1} for Lunch
-p C spent $#{expense2} for Beer
-p D spent $#{expense3} for Gas
+p A spent $
+    input(type='number', min='0', max='99', value= expenses[0])
+    | for Dinner
+p B spent $
+    input(type='number', min='0', max='99', value= expenses[1])
+    | for Lunch
+p C spent $
+    input(type='number', min='0', max='99', value= expenses[2])
+    | for Beer
+p D spent $
+    input(type='number', min='0', max='99', value= expenses[3])
+    | for Gas
 br
-p total expense $#{total}
+p Total expense $#{total}
 br
 p Who owes who for how much??
 br
@@ -22,28 +30,28 @@ table
     td.legend D
   tr
     td A owes
-    td $#{naive00}
-    td $#{naive01}
-    td $#{naive02}
-    td $#{naive03}
+    td $#{naive[0][0]}
+    td $#{naive[0][1]}
+    td $#{naive[0][2]}
+    td $#{naive[0][3]}
   tr
     td B owes
-    td $#{naive10}
-    td $#{naive11}
-    td $#{naive12}
-    td $#{naive13}
+    td $#{naive[1][0]}
+    td $#{naive[1][1]}
+    td $#{naive[1][2]}
+    td $#{naive[1][3]}
   tr
     td C owes
-    td $#{naive20}
-    td $#{naive21}
-    td $#{naive22}
-    td $#{naive23}
+    td $#{naive[2][0]}
+    td $#{naive[2][1]}
+    td $#{naive[2][2]}
+    td $#{naive[2][3]}
   tr
     td D owes
-    td $#{naive30}
-    td $#{naive31}
-    td $#{naive32}
-    td $#{naive33}
+    td $#{naive[3][0]}
+    td $#{naive[3][1]}
+    td $#{naive[3][2]}
+    td $#{naive[3][3]}
 br
 p 
   b TabThat Solution 
@@ -58,25 +66,25 @@ table
     td.legend D
   tr
     td A owes
-    td $#{opt00}
-    td $#{opt01}
-    td $#{opt02}
-    td $#{opt03}
+    td $#{opt[0][0]}
+    td $#{opt[0][1]}
+    td $#{opt[0][2]}
+    td $#{opt[0][3]}
   tr
     td B owes
-    td $#{opt10}
-    td $#{opt11}
-    td $#{opt12}
-    td $#{opt13}
+    td $#{opt[1][0]}
+    td $#{opt[1][1]}
+    td $#{opt[1][2]}
+    td $#{opt[1][3]}
   tr
     td C owes
-    td $#{opt20}
-    td $#{opt21}
-    td $#{opt22}
-    td $#{opt23}
+    td $#{opt[2][0]}
+    td $#{opt[2][1]}
+    td $#{opt[2][2]}
+    td $#{opt[2][3]}
   tr
     td D owes
-    td $#{opt30}
-    td $#{opt31}
-    td $#{opt32}
-    td $#{opt33}
+    td $#{opt[3][0]}
+    td $#{opt[3][1]}
+    td $#{opt[3][2]}
+    td $#{opt[3][3]}
