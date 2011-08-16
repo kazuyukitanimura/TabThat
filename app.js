@@ -107,13 +107,13 @@ app.get('/', function(req, res){
     return subTotals[i] - subTotals[j];
   });
   while(subTotals[idxArray[0]]!==0){
-    var owener = idxArray[numPpl-1]; // pay
-    var owenee = idxArray[0]; // receive
-    var minOwe = Math.min(subTotals[owener], -subTotals[owenee]);
-    oweTableNew[owener][owenee] =  minOwe;
-    oweTableNew[owenee][owener] = -minOwe;
-    subTotals[owener] -= minOwe;
-    subTotals[owenee] += minOwe;
+    var owner = idxArray[numPpl-1]; // pay
+    var ownee = idxArray[0]; // receive
+    var minOwe = Math.min(subTotals[owner], -subTotals[ownee]);
+    oweTableNew[owner][ownee] =  minOwe;
+    oweTableNew[ownee][owner] = -minOwe;
+    subTotals[owner] -= minOwe;
+    subTotals[ownee] += minOwe;
     idxArray.sort(function(i, j){
       return subTotals[i] - subTotals[j];
     });
