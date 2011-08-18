@@ -45,10 +45,6 @@ app.get('/', function(req, res){
   for(var i=numPpl; i--;){
     total += expenses[i];
   }
-  //var expenses = [51,19,16,57]; // index == userID
-  //var expenses = [70,19,57,76]; // index == userID
-  //var expenses = [27,24,51,87]; // index == userID
-  //var expenses = [98,75,77,17,15];
 
   // NO Optimization
   var naiveTable = expenses.map(function(x, i){
@@ -73,19 +69,6 @@ app.get('/', function(req, res){
   }); // 2D Array
   // sanity check
   print2DArray(oweTable);
-
-  //var oweTable = [[  0,  0,  0,  5,  5,  0],
-  //                [  0,  0,  0,  0,  5,  5],
-  //                [  0,  0,  0, 15,  0,  0],
-  //                [ -5,  0,-15,  0,  0,  0],
-  //                [ -5, -5,  0,  0,  0,  0],
-  //                [  0, -5,  0,  0,  0,  0]];
-  //var oweTable = [[  0,  0,  0,  5,  5],
-  //                [  0,  0,  0, 10, 10],
-  //                [  0,  0,  0,  5, 25],
-  //                [ -5,-10, -5,  0,  0],
-  //                [ -5,-10,-25,  0,  0]];
-  //var numPpl = oweTable.length;
 
   // 2nd Optimization: reduce the # of edges O(N**2 *logN)
   // 2nd optimization guarantees that the graph is a bipartite graph, i.e. the graph diameter is 1
