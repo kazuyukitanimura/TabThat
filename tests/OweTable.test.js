@@ -111,7 +111,7 @@ module.exports = {
     }
 
     for(var i=subTotals; i--;){
-      subTotals[i].should.equal(subTotals[0]);
+      subTotals[i].should.equal(0);
     }
   }
 };

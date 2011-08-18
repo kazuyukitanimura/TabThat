@@ -7,6 +7,7 @@ var express = require('express');
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore({ reapInterval: 60000 * 10 });
 var assert = require('assert');
+var OweTable = require('./lib/OweTable');
 
 var app = module.exports = express.createServer();
 
@@ -111,12 +112,23 @@ app.get('/', function(req, res){
   var nt  = divide2DArrayByX(naiveTable,  numPpl);
   var ot  = divide2DArrayByX(oweTableNew, numPpl);
   var ot2 = negativeToZero(ot);
+
+  var ot3 = new OweTable(naiveTable).optimize().divide(numPpl);
+  ot3.print();
+  ot3 = ot3.oweTable;
+
+  for(var i=0; i<numPpl; i++){
+    for(var j=0; j<numPpl; j++){
+      assert.deepEqual(ot2[i][j], ot3[i][j]);
+    }
+  }
+
   res.render('index', {
     title: 'TabThat',
     expenses : expenses,
     total : total,
     naive : nt,
-    opt : ot2
+    opt : ot3
   });
 
   function print2DArray(t){
