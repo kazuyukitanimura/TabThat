@@ -6,7 +6,6 @@
 var express = require('express');
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore({ reapInterval: 60000 * 10 });
-var assert = require('assert');
 var OweTable = require('./lib/OweTable');
 
 var app = module.exports = express.createServer();
@@ -58,147 +57,24 @@ app.get('/', function(req, res){
       }
     });
   }); // 2D Array
-  // sanity check
-  //print2DArray(naiveTable);
-
-  // 1st Optimization: eliminate the bidirectional $ flow O(n**2)
-  // 1st optimization guarantees that the graph is DAG and has no bidirectional edges
-  var oweTable = expenses.map(function(x){
-    return expenses.map(function(y){
-      return y-x; // divide by numPpl later
-    });
-  }); // 2D Array
-  // sanity check
-  //print2DArray(oweTable);
-
-  // 2nd Optimization: reduce the # of edges O(N**2 *logN)
-  // 2nd optimization guarantees that the graph is a bipartite graph, i.e. the graph diameter is 1
-  var oweTableNew = [];
-  var subTotals = [];
-  var idxArray = [];
-  for(var i=0; i<numPpl; i++){
-    var oweArray = [];
-    var subtotal = 0;
-    for(var j=0; j<numPpl; j++){
-      oweArray[j] = 0;
-      subtotal += oweTable[i][j];
-    }
-    oweTableNew[i] = oweArray;
-    subTotals[i] = subtotal;
-    idxArray[i] = i;
-  }
-  idxArray.sort(function(i, j){
-    return subTotals[i] - subTotals[j];
-  });
-  while(subTotals[idxArray[0]]!==0){
-    var owner = idxArray[numPpl-1]; // pay
-    var ownee = idxArray[0]; // receive
-    var minOwe = Math.min(subTotals[owner], -subTotals[ownee]);
-    oweTableNew[owner][ownee] =  minOwe;
-    oweTableNew[ownee][owner] = -minOwe;
-    subTotals[owner] -= minOwe;
-    subTotals[ownee] += minOwe;
-    idxArray.sort(function(i, j){
-      return subTotals[i] - subTotals[j];
-    });
-  }
-  // sanity check
-  //print2DArray(oweTableNew);
-  for(var i=subTotals; i--;){
-    assert.ok(subTotals[i]===0);
-  }
-  //oweTable = transpose(oweTableNew);
-
-  //var nt  = divide2DArrayByX(naiveTable,  numPpl);
-  var ot  = divide2DArrayByX(oweTableNew, numPpl);
-  var ot2 = negativeToZero(ot);
 
   var nt = new OweTable(naiveTable);
   nt.print();
   var ot3 = nt.optimize();
   ot3.print();
+
+  nt = nt.divide(numPpl);
+  nt.print();
   ot3 = ot3.divide(numPpl);
   ot3.print();
-
-  nt  = nt.oweTable;
-  ot3 = ot3.oweTable;
-
-  for(var i=0; i<numPpl; i++){
-    for(var j=0; j<numPpl; j++){
-      assert.deepEqual(ot2[i][j], ot3[i][j]);
-    }
-  }
 
   res.render('index', {
     title: 'TabThat',
     expenses : expenses,
     total : total,
-    naive : nt,
-    opt : ot3
+    naive : nt.oweTable,
+    opt : ot3.oweTable
   });
-
-  function print2DArray(t){
-    assert.ok(t.length===t[0].length);
-    console.dir(t);
-    for(var i=0; i<t.length; i++){
-      var subtotal = 0;
-      for(var j=0; j<t[i].length; j++){
-        subtotal += t[i][j];
-      }
-      console.log(i+": "+subtotal);
-    }
-    console.log("");
-  }
-
-  function transpose(baseArray){
-    assert.ok(baseArray.length===baseArray[0].length);
-    var newArray = [];
-    for(var i=0; i<baseArray.length; i++){
-      newArray.push([]);
-      for(var j=0; j<baseArray.length; j++){
-        newArray[i][j] = baseArray[j][i];
-      }
-    }
-    return newArray;
-  }
-
-  function copy2DArray(baseArray){
-    var newArray = [];
-    for(var i=0; i<baseArray.length; i++){
-      newArray.push([]);
-      for(var j=0; j<baseArray[0].length; j++){
-        newArray[i][j] = baseArray[i][j];
-      }
-    }
-    return newArray;
-  }
-  
-  function divide2DArrayByX(baseArray, x){
-    var newArray = [];
-    for(var i=0; i<baseArray.length; i++){
-      newArray.push([]);
-      for(var j=0; j<baseArray[0].length; j++){
-        newArray[i][j] = baseArray[i][j] / x;
-      }
-    }
-    return newArray;
-  }
-
-  function negativeToZero(baseArray){
-    var newArray = [];
-    for(var i=0; i<baseArray.length; i++){
-      newArray.push([]);
-      for(var j=0; j<baseArray[0].length; j++){
-        if(baseArray[i][j]<0){
-          newArray[i][j] = 0;
-        }
-        else{
-          newArray[i][j] = baseArray[i][j];
-        }
-      }
-    }
-    return newArray;
-  }
 });
 
 app.listen(3000);
