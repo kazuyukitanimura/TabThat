@@ -59,7 +59,7 @@ app.get('/', function(req, res){
     });
   }); // 2D Array
   // sanity check
-  print2DArray(naiveTable);
+  //print2DArray(naiveTable);
 
   // 1st Optimization: eliminate the bidirectional $ flow O(n**2)
   // 1st optimization guarantees that the graph is DAG and has no bidirectional edges
@@ -69,7 +69,7 @@ app.get('/', function(req, res){
     });
   }); // 2D Array
   // sanity check
-  print2DArray(oweTable);
+  //print2DArray(oweTable);
 
   // 2nd Optimization: reduce the # of edges O(N**2 *logN)
   // 2nd optimization guarantees that the graph is a bipartite graph, i.e. the graph diameter is 1
@@ -103,18 +103,24 @@ app.get('/', function(req, res){
     });
   }
   // sanity check
-  print2DArray(oweTableNew);
+  //print2DArray(oweTableNew);
   for(var i=subTotals; i--;){
     assert.ok(subTotals[i]===0);
   }
   //oweTable = transpose(oweTableNew);
 
-  var nt  = divide2DArrayByX(naiveTable,  numPpl);
+  //var nt  = divide2DArrayByX(naiveTable,  numPpl);
   var ot  = divide2DArrayByX(oweTableNew, numPpl);
   var ot2 = negativeToZero(ot);
 
-  var ot3 = new OweTable(naiveTable).optimize().divide(numPpl);
+  var nt = new OweTable(naiveTable);
+  nt.print();
+  var ot3 = nt.optimize();
   ot3.print();
+  ot3 = ot3.divide(numPpl);
+  ot3.print();
+
+  nt  = nt.oweTable;
   ot3 = ot3.oweTable;
 
   for(var i=0; i<numPpl; i++){
