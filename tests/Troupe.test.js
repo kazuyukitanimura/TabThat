@@ -3,6 +3,7 @@ var OweTable = require('../lib/OweTable');
 var Troupe = require('../lib/Troupe');
 
 var users = [{username:'A', user_id:0}, {username:'B', user_id:1}, {username:'C', user_id:2}, {username:'B', user_id:1}, {username:'D', user_id:3}, {username:'D', user_id:3}];
+var newUsers = [{username:'A', user_id:0}, {username:'E', user_id:4}];
 
 module.exports = {
   'new': function(){
@@ -25,4 +26,11 @@ module.exports = {
     troupe.print();
     troupe.should.have.ownProperty('oweTable');
   },
+  'addUsers': function(){
+    var troupe = new Troupe(users);
+    troupe.print();
+    troupe.addUsers(newUsers);
+    troupe.print();
+    troupe.numPpl.should.equal(troupe.oweTable.length);
+  }
 };
