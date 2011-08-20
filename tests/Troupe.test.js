@@ -2,8 +2,14 @@ var should = require('should');
 var OweTable = require('../lib/OweTable');
 var Troupe = require('../lib/Troupe');
 
-var users = [{username:'A', user_id:0}, {username:'B', user_id:1}, {username:'C', user_id:2}, {username:'B', user_id:1}, {username:'D', user_id:3}, {username:'D', user_id:3}];
-var newUsers = [{username:'A', user_id:0}, {username:'E', user_id:4}];
+var A = {username:'A', user_id:0};
+var B = {username:'B', user_id:1};
+var C = {username:'C', user_id:2};
+var D = {username:'D', user_id:3};
+var E = {username:'E', user_id:4};
+var users = [A, B, C, B, D, D];
+var newUsers = [A, E];
+var oldUsers = [A, D];
 
 module.exports = {
   'new': function(){
@@ -29,7 +35,15 @@ module.exports = {
   'addUsers': function(){
     var troupe = new Troupe(users);
     troupe.print();
-    troupe.addUsers(newUsers);
+    troupe.addUsers(newUsers).should.be.true;
+    troupe.should.be.an.instanceof(Troupe);
+    troupe.print();
+    troupe.numPpl.should.equal(troupe.oweTable.length);
+  },
+  'delUsers': function(){
+    var troupe = new Troupe(users.concat(newUsers));
+    troupe.print();
+    troupe.delUsers(oldUsers).should.be.false;
     troupe.print();
     troupe.numPpl.should.equal(troupe.oweTable.length);
   }
