@@ -1,50 +1,66 @@
 var should = require('should');
-var OweTable = require('../lib/OweTable');
 var Troupe = require('../lib/Troupe');
+var User   = require('../lib/User');
 
-var A = {username:'A', user_id:0};
-var B = {username:'B', user_id:1};
-var C = {username:'C', user_id:2};
-var D = {username:'D', user_id:3};
-var E = {username:'E', user_id:4};
+var A = new User({username:'A', user_id:0});
+var B = new User({username:'B', user_id:1});
+var C = new User({username:'C', user_id:2});
+var D = new User({username:'D', user_id:3});
+var E = new User({username:'E', user_id:4});
 var users = [A, B, C, B, D, D];
 var newUsers = [A, E];
 var oldUsers = [A, D];
 
 module.exports = {
   'new': function(){
+    /*** without defualt oweTable ***/
     var troupe = new Troupe(users);
     troupe.should.not.equal(null);
-    troupe.should.be.an.instanceof(OweTable);
     troupe.print();
-    troupe.should.have.ownProperty('oweTable');
-    newTable = troupe.oweTable;
+    troupe.should.have.ownProperty('troupTable');
+    troupe.should.have.ownProperty('numPpl');
+    var troupTable = troupe.troupTable;
+    var user_ids   = Object.keys(troupTable);
+    var numPpl     = user_ids.length;
 
-    for(var i=0; i<newTable.length; i++){
-      for(var j=0; j<newTable[0].length; j++){
-        newTable[i][j].should.equal(0);
-        newTable[i][j] = 1;
+    var newTable = [];
+
+    for(var i=0; i<numPpl; i++){
+      newTable.push([]);
+      for(var j=0; j<numPpl; j++){
+        troupTable[user_ids[i]][user_ids[j]].should.equal(0);
+        newTable[i][j] = Math.floor(Math.random()*100); // between 0 and 99
       }
     }
 
+    /*** with defualt oweTable ***/
     troupe = new Troupe(users, newTable);
     troupe.should.not.equal(null);
     troupe.print();
-    troupe.should.have.ownProperty('oweTable');
+    troupe.should.have.ownProperty('troupTable');
+    troupe.should.have.ownProperty('numPpl');
+    troupTable = troupe.troupTable;
+    user_ids   = Object.keys(troupTable);
+
+    for(var i=0; i<numPpl; i++){
+      for(var j=0; j<numPpl; j++){
+        troupTable[user_ids[i]][user_ids[j]].should.equal(newTable[i][j]);
+      }
+    }
   },
-  'addUsers': function(){
-    var troupe = new Troupe(users);
-    troupe.print();
-    troupe.addUsers(newUsers).should.be.true;
-    troupe.should.be.an.instanceof(Troupe);
-    troupe.print();
-    troupe.numPpl.should.equal(troupe.oweTable.length);
-  },
-  'delUsers': function(){
-    var troupe = new Troupe(users.concat(newUsers));
-    troupe.print();
-    troupe.delUsers(oldUsers).should.be.false;
-    troupe.print();
-    troupe.numPpl.should.equal(troupe.oweTable.length);
-  }
+  //'addUsers': function(){
+  //  var troupe = new Troupe(users);
+  //  troupe.print();
+  //  troupe.addUsers(newUsers).should.be.true;
+  //  troupe.should.be.an.instanceof(Troupe);
+  //  troupe.print();
+  //  troupe.numPpl.should.equal(troupe.oweTable.length);
+  //},
+  //'delUsers': function(){
+  //  var troupe = new Troupe(users.concat(newUsers));
+  //  troupe.print();
+  //  troupe.delUsers(oldUsers).should.be.false;
+  //  troupe.print();
+  //  troupe.numPpl.should.equal(troupe.oweTable.length);
+  //}
 };
