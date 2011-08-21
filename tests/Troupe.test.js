@@ -2,6 +2,12 @@ var should = require('should');
 var Troupe = require('../lib/Troupe');
 var User   = require('../lib/User');
 
+Array.prototype.sum = function(){
+  return this.reduce(function(x, y){
+    return x + y; 
+  });
+}
+
 var A = new User({username:'A', user_id:0});
 var B = new User({username:'B', user_id:1});
 var C = new User({username:'C', user_id:2});
@@ -48,14 +54,33 @@ module.exports = {
       }
     }
   },
-  //'addUsers': function(){
-  //  var troupe = new Troupe(users);
-  //  troupe.print();
-  //  troupe.addUsers(newUsers).should.be.true;
-  //  troupe.should.be.an.instanceof(Troupe);
-  //  troupe.print();
-  //  troupe.numPpl.should.equal(troupe.oweTable.length);
-  //},
+  'addUsers': function(){
+    var troupe = new Troupe(users);
+    var troupTable = troupe.troupTable;
+    var user_ids   = Object.keys(troupTable);
+    var numPpl     = user_ids.length;
+
+    var newTable = [];
+    for(var i=0; i<numPpl; i++){
+      newTable.push([]);
+      for(var j=0; j<numPpl; j++){
+        newTable[i][j] = Math.floor(Math.random()*100); // between 0 and 99
+      }
+    }
+
+    var troupe = new Troupe(users, newTable);
+    troupe.print();
+    troupe.addUsers(newUsers).should.be.false;
+    troupe.addUsers(E).should.be.true;
+    troupe.should.be.an.instanceof(Troupe);
+    troupTable = troupe.troupTable;
+    troupe.print();
+    for(var i=0; i<numPpl; i++){
+      for(var j=0; j<numPpl; j++){
+        troupTable[user_ids[i]][user_ids[j]].should.equal(newTable[i][j]); // between 0 and 99
+      }
+    }
+  },
   //'delUsers': function(){
   //  var troupe = new Troupe(users.concat(newUsers));
   //  troupe.print();
