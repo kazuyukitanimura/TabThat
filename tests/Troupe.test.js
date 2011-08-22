@@ -55,7 +55,7 @@ module.exports = {
     }
   },
   'addUsers': function(){
-    var troupe = new Troupe(users);
+    var troupe     = new Troupe(users);
     var troupTable = troupe.troupTable;
     var user_ids   = Object.keys(troupTable);
     var numPpl     = user_ids.length;
@@ -68,7 +68,7 @@ module.exports = {
       }
     }
 
-    var troupe = new Troupe(users, newTable);
+    troupe = new Troupe(users, newTable);
     troupe.print();
     troupe.addUsers(newUsers).should.be.false;
     troupe.addUsers(E).should.be.true;
@@ -88,5 +88,76 @@ module.exports = {
     troupe.print();
     troupe.delUsers(oldUsers).should.be.false;
     troupe.print();
-  }
+  },
+  'charge': function(){
+    var troupe = new Troupe(users);
+    troupe.print();
+    troupe.charge(A, E, 3).should.be.false;
+    troupe.print();
+    troupe.charge(A, D, 3).should.be.true;
+    troupe.print();
+
+    var troupTable = troupe.troupTable;
+    troupTable[A.user_id][D.user_id].should.equal(3);
+  },
+  'pay': function(){
+    var troupe = new Troupe(users);
+    troupe.print();
+    troupe.pay(A, E, 3).should.be.false;
+    troupe.print();
+    troupe.pay(A, D, 3).should.be.false;
+    troupe.print();
+    troupe.charge(A, D, 3).should.be.true;
+    troupe.pay(A, D, 3).should.be.true;
+    troupe.print();
+  },
+  'optimize': function(){
+    var troupe     = new Troupe(users);
+    var troupTable = troupe.troupTable;
+    var user_ids   = Object.keys(troupTable);
+    var numPpl     = user_ids.length;
+
+    var newTable = [];
+    for(var i=0; i<numPpl; i++){
+      newTable.push([]);
+      for(var j=0; j<numPpl; j++){
+        if(i===j){
+          newTable[i][j] = 0;
+        }else{
+          newTable[i][j] = Math.floor(Math.random()*100); // between 0 and 99
+        }
+      }
+    }
+
+    troupe = new Troupe(users, newTable);
+    troupe.print();
+    troupe = troupe.optimize();
+    troupe.print();
+
+    troupTable    = troupe.troupTable;
+    var subTotals = [];
+    for(var i=0; i<numPpl; i++){
+      var subtotal = 0;
+      for(var j=0; j<numPpl; j++){
+        subtotal += troupTable[user_ids[i]][user_ids[j]];
+      }
+      subTotals[i] = subtotal;
+    }
+    console.dir(subTotals);
+
+    var subTotals2 = [];
+    for(var i=0; i<numPpl; i++){
+      var subtotal = 0;
+      for(var j=0; j<numPpl; j++){
+        subtotal += newTable[i][j] - newTable[j][i];
+      }
+      subTotals2[i] = subtotal;
+    }
+    console.dir(subTotals2);
+    for(var i=0; i<numPpl; i++){
+      if(subTotals2[i] > 0){
+        subTotals2[i].should.equal(subTotals[i]);
+      }
+    }
+  },
 };
