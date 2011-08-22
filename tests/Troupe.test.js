@@ -81,11 +81,12 @@ module.exports = {
       }
     }
   },
-  //'delUsers': function(){
-  //  var troupe = new Troupe(users.concat(newUsers));
-  //  troupe.print();
-  //  troupe.delUsers(oldUsers).should.be.false;
-  //  troupe.print();
-  //  troupe.numPpl.should.equal(troupe.oweTable.length);
-  //}
+  'delUsers': function(){
+    var troupe = new Troupe(users.concat(newUsers));
+    troupe.print();
+    troupe.delUsers(oldUsers).should.be.true;
+    troupe.print();
+    troupe.delUsers(oldUsers).should.be.false;
+    troupe.print();
+  }
 };
