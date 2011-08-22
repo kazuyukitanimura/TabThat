@@ -6,7 +6,8 @@
 var express = require('express');
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore({ reapInterval: 60000 * 10 });
-var OweTable = require('./lib/OweTable');
+var Troupe = require('./lib/Troupe');
+var User = require('./lib/User');
 
 var app = module.exports = express.createServer();
 
@@ -36,7 +37,13 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-  var numPpl = 4;
+  var A = new User({username:'A', user_id:0});
+  var B = new User({username:'B', user_id:1});
+  var C = new User({username:'C', user_id:2});
+  var D = new User({username:'D', user_id:3});
+  var users = [A, B, C, D];
+
+  var numPpl = users.length;
   var total = 0;
   var expenses = []; // index == userID
   for(var i=numPpl; i--;){
@@ -53,27 +60,27 @@ app.get('/', function(req, res){
         return 0;
       }
       else{
-        return y; // divide by numPpl later
+        return y / numPpl; // can divide by numPpl later
       }
     });
   }); // 2D Array
 
-  var nt = new OweTable(naiveTable);
+  var nt = new Troupe(users, naiveTable);
   nt.print();
-  var ot3 = nt.optimize();
-  ot3.print();
+  var ot = nt.optimize();
+  ot.print();
 
-  nt = nt.divide(numPpl);
-  nt.print();
-  ot3 = ot3.divide(numPpl);
-  ot3.print();
+  //nt = nt.divide(numPpl);
+  //nt.print();
+  //ot = ot.divide(numPpl);
+  //ot.print();
 
   res.render('index', {
     title: 'TabThat',
     expenses : expenses,
     total : total,
-    naive : nt.oweTable,
-    opt : ot3.oweTable
+    naive : nt.troupTable,
+    opt : ot.troupTable
   });
 });
 
