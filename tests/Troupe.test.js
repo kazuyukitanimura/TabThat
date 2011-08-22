@@ -121,11 +121,7 @@ module.exports = {
     for(var i=0; i<numPpl; i++){
       newTable.push([]);
       for(var j=0; j<numPpl; j++){
-        if(i===j){
-          newTable[i][j] = 0;
-        }else{
-          newTable[i][j] = Math.floor(Math.random()*100); // between 0 and 99
-        }
+        newTable[i][j] = Math.floor(Math.random()*100); // between 0 and 99
       }
     }
 
@@ -151,13 +147,11 @@ module.exports = {
       for(var j=0; j<numPpl; j++){
         subtotal += newTable[i][j] - newTable[j][i];
       }
-      subTotals2[i] = subtotal;
+      subTotals2[i] = Math.max(subtotal, 0);
     }
     console.dir(subTotals2);
     for(var i=0; i<numPpl; i++){
-      if(subTotals2[i] > 0){
-        subTotals2[i].should.equal(subTotals[i]);
-      }
+      subTotals2[i].should.equal(subTotals[i]);
     }
   },
 };
