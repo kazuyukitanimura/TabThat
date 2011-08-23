@@ -47,7 +47,7 @@ app.get('/', function(req, res){
   var total = 0;
   var expenses = []; // index == userID
   for(var i=numPpl; i--;){
-    expenses.push(Math.ceil(Math.random()*100)); // between 0 and 100
+    expenses.push(Math.ceil(Math.random()*100)*100); // between $0 and $100
   }
   for(var i=numPpl; i--;){
     total += expenses[i];
@@ -60,7 +60,7 @@ app.get('/', function(req, res){
         return 0;
       }
       else{
-        return y / numPpl; // can divide by numPpl later
+        return y / numPpl;
       }
     });
   }); // 2D Array
@@ -79,6 +79,7 @@ app.get('/', function(req, res){
     title: 'TabThat',
     expenses : expenses,
     total : total,
+    users : users,
     naive : nt.troupTable,
     opt : ot.troupTable
   });
