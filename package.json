@@ -1,10 +1,11 @@
 {
-    "name": "application-name"
+    "name": "TabThat"
   , "version": "0.0.1"
   , "private": true
   , "dependencies": {
-      "express": "2.4.3"
-    , "jade": ">= 0.0.1"
-    , "less": ">= 0.0.1"
+      "express": ">= 2.4.3"
+    , "jade": ">= 0.14.1"
+    , "less": ">= 1.1.4"
+    , "should": ">= 0.2.1"
   }
 }
